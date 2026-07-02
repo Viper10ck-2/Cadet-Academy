@@ -86,7 +86,6 @@ class DatabaseSeeder extends Seeder
             'start_time' => '00:00:00',
             'end_time' => '23:59:59',
             'room' => 'Lab 1',
-            'is_active' => true,
         ]);
     }
 }
