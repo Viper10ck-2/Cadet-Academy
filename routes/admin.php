@@ -7,6 +7,7 @@ use App\Models\{Guardian, SchoolClass, Schedule, Material, Assignment, Certifica
 use Illuminate\Support\Facades\Route;
 
 // Macro to register CRUD routes
+if (!function_exists('crudRoutes')) {
 function crudRoutes(string $prefix, string $model, array $fillable, array $columns, string $title): void
 {
     Route::get($prefix, function () use ($model, $fillable, $columns, $title, $prefix) {
@@ -70,6 +71,8 @@ function crudRoutes(string $prefix, string $model, array $fillable, array $colum
         return app()->call([$ctrl, 'destroy'], ['id' => $id]);
     })->name(str_replace('/', '.', $prefix) . '.destroy');
 }
+
+} // end if function_exists
 
 // 👨‍🎓 Akademik
 crudRoutes('akademik/orang-tua', Guardian::class,
