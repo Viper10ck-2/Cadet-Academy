@@ -68,5 +68,25 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
         $cadet2->assignRole('cadet');
+
+        // Create sample class & schedule for testing absen
+        $class = \App\Models\SchoolClass::create([
+            'name' => 'Kelas A - Pemrograman',
+            'code' => 'KLS-A',
+            'description' => 'Kelas pemrograman dasar',
+            'capacity' => 30,
+            'is_active' => true,
+        ]);
+        $class->students()->attach([$cadet1->id, $cadet2->id]);
+
+        // Schedule: all day today (Kamis)
+        \App\Models\Schedule::create([
+            'class_id' => $class->id,
+            'day' => 'kamis',
+            'start_time' => '00:00:00',
+            'end_time' => '23:59:59',
+            'room' => 'Lab 1',
+            'is_active' => true,
+        ]);
     }
 }
