@@ -144,6 +144,6 @@ Route::middleware(['auth', 'role:cadet'])->prefix('cadet')->name('cadet.')->grou
     Route::get('/notifications', [App\Http\Controllers\Cadet\DashboardController::class, 'notifications'])->name('notifications');
 });
 
-} // end else (main app routes)
+    require __DIR__ . '/auth.php';
 
-require __DIR__ . '/auth.php';
+} // end else (main app routes)
