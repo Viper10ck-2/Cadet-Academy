@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 
 // 📸 Absen Subdomain (absen.cadet-academy.test) OR port 8080
 $isAbsen = request()->getHost() === 'absen.' . env('APP_DOMAIN', 'cadet-academy.test')
-        || request()->getPort() === 8080
+        || in_array(request()->getPort(), [8080, 8443])
         || request()->server('HTTP_X_APP_TYPE') === 'absen';
 
 if ($isAbsen) {
