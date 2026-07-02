@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0F172A">
+    <title>Offline | Absen Academy</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:system-ui,-apple-system,sans-serif;background:linear-gradient(135deg,#0F172A,#1E3A5F);color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px}
+        .card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:40px 32px;max-width:360px;width:100%}
+        .icon{font-size:64px;margin-bottom:16px}
+        h1{font-size:22px;font-weight:700;margin-bottom:8px;color:#D4A853}
+        p{font-size:14px;color:#94A3B8;line-height:1.6}
+        button{margin-top:24px;background:linear-gradient(135deg,#D4A853,#F0C75E);color:#0F172A;border:none;padding:12px 32px;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer}
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon">📡</div>
+        <h1>Anda Sedang Offline</h1>
+        <p>Tidak dapat terhubung ke server. Periksa koneksi internet Anda dan coba lagi.</p>
+        <button onclick="location.reload()">🔄 Coba Lagi</button>
+    </div>
+</body>
+</html>
