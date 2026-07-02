@@ -38,7 +38,20 @@ class AbsenController extends Controller
     {
         $user = auth()->user();
 
-        // 1. Validate check-in/check-out logic
+        // 1. Validate schedule
+        $todayName = strtolower(now()->locale('id')->dayName);
+        $classIds = $user->classes()->pluck('id');
+        $activeSchedule = Schedule::whereIn('class_id', $classIds)
+            ->where('day', $todayName)
+            ->whereTime('start_time', '<=', now()->format('H:i:s'))
+            ->whereTime('end_time', '>=', now()->format('H:i:s'))
+            ->first();
+
+        if (!$activeSchedule) {
+            return response()->json(['error' => 'Maaf, Anda melewati waktu absensi.'], 400);
+        }
+
+        // 2. Validate check-in/check-out logic
         $type = $request->type ?? 'check_in';
         $todayAtt = Attendance::where('user_id', $user->id)->whereDate('created_at', today());
         $alreadyIn = (clone $todayAtt)->where('type', 'check_in')->exists();
