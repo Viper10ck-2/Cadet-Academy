@@ -21,6 +21,7 @@ if ($isAbsen) {
     })->name('absen.login');
 
     Route::get('/login', fn() => view('absen.login'))->name('login');
+    Route::post('/login', [App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'store']);
 
     Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\AbsenController::class, 'dashboard'])->name('absen.dashboard');
