@@ -30,12 +30,7 @@
 
     {{-- Action --}}
     <div class="mx-5 mb-4">
-        @if(!$activeSchedule)
-        <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-center">
-            <p class="text-amber-400 text-sm font-medium">📅 Tidak ada jadwal aktif saat ini</p>
-            <p class="text-amber-400/60 text-xs mt-1">Absensi hanya tersedia saat jam kelas berlangsung</p>
-        </div>
-        @elseif($checkedIn && !$checkedOut)
+        @if($checkedIn && !$checkedOut)
         <button @click="doAbsen('check_out')" :disabled="loading" class="w-full py-4 bg-red-500/20 border border-red-500/40 rounded-2xl text-red-400 font-bold text-lg hover:bg-red-500/30 transition disabled:opacity-50">
             <span x-show="!loading">🚪 Absen Pulang</span>
             <span x-show="loading" class="flex items-center justify-center gap-2"><svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Memproses...</span>
