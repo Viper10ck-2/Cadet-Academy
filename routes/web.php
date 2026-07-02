@@ -25,6 +25,7 @@ if ($isAbsen) {
     Route::get('/login', fn() => view('absen.login'))->name('login');
     Route::post('/login', [App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'store']);
     Route::get('/dashboard', fn() => redirect()->route('absen.dashboard'))->name('dashboard');
+    Route::post('/logout', [App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
     Route::middleware(['auth', 'role:cadet'])->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\AbsenController::class, 'dashboard'])->name('absen.dashboard');
