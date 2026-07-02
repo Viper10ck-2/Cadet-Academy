@@ -9,8 +9,12 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-// 📸 Absen Subdomain (absen.cadet-academy.test) — MUST be first!
-Route::domain('absen.' . env('APP_DOMAIN', 'cadet-academy.test'))->group(function () {
+// 📸 Absen Subdomain (absen.cadet-academy.test) OR port 8080
+$isAbsen = request()->getHost() === 'absen.' . env('APP_DOMAIN', 'cadet-academy.test')
+        || request()->getPort() === 8080
+        || request()->server('HTTP_X_APP_TYPE') === 'absen';
+
+if ($isAbsen) {
     Route::get('/', function () {
         if (auth()->check()) return redirect()->route('absen.dashboard');
         return view('absen.login');
@@ -22,7 +26,10 @@ Route::domain('absen.' . env('APP_DOMAIN', 'cadet-academy.test'))->group(functio
         Route::get('/history', [App\Http\Controllers\AbsenController::class, 'history'])->name('absen.history');
         Route::get('/profile', [App\Http\Controllers\AbsenController::class, 'profile'])->name('absen.profile');
     });
-});
+}
+
+// Main App Routes (only when NOT absen)
+else {
 
 Route::get('/', function () {
     return view('welcome');
@@ -134,5 +141,7 @@ Route::middleware(['auth', 'role:cadet'])->prefix('cadet')->name('cadet.')->grou
     Route::get('/discussions', [App\Http\Controllers\Cadet\DashboardController::class, 'discussions'])->name('discussions');
     Route::get('/notifications', [App\Http\Controllers\Cadet\DashboardController::class, 'notifications'])->name('notifications');
 });
+
+} // end else (main app routes)
 
 require __DIR__ . '/auth.php';
