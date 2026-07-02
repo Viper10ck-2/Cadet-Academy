@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -29,34 +30,42 @@ class DatabaseSeeder extends Seeder
         $cadetRole->givePermissionTo(['take exams', 'do attendance']);
 
         // Create admin user
-        $admin = User::factory()->create([
+        $admin = User::create([
             'name' => 'Admin Cadet Academy',
             'email' => 'admin@cadetacademy.test',
             'nip_nis' => 'ADM001',
             'phone' => '081234567890',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
         ]);
         $admin->assignRole('admin');
 
         // Create sample instructor
-        $instructor = User::factory()->create([
+        $instructor = User::create([
             'name' => 'Instruktur Utama',
             'email' => 'instructor@cadetacademy.test',
             'nip_nis' => 'INS001',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
         ]);
         $instructor->assignRole('instructor');
 
         // Create sample cadets
-        $cadet1 = User::factory()->create([
+        $cadet1 = User::create([
             'name' => 'Cadet Satu',
             'email' => 'cadet1@cadetacademy.test',
             'nip_nis' => 'CDT001',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
         ]);
         $cadet1->assignRole('cadet');
 
-        $cadet2 = User::factory()->create([
+        $cadet2 = User::create([
             'name' => 'Cadet Dua',
             'email' => 'cadet2@cadetacademy.test',
             'nip_nis' => 'CDT002',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
         ]);
         $cadet2->assignRole('cadet');
     }
