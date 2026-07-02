@@ -91,3 +91,31 @@ body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
     outline-offset: 2px;
     border-radius: 0.5rem;
 }
+
+/* Sidebar Navigation */
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0.75rem;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #94A3B8;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+.nav-active { background: rgba(212,175,55,0.12); color: #D4AF37; }
+.nav-active:hover { background: rgba(212,175,55,0.18); color: #D4AF37; }
+.nav-sub {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #64748B;
+    transition: all 0.2s;
+}
+.nav-sub:hover { color: #fff; background: rgba(255,255,255,0.05); }
+.nav-sub-active { color: #D4AF37; }
