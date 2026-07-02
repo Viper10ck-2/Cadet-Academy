@@ -78,7 +78,7 @@
                         <svg :class="open ? 'rotate-180' : ''" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                     <div x-show="open" class="ml-4 mt-1 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-3">
-                        <a href="{{ route('attendance.index') }}" class="block px-3 py-1.5 text-sm rounded-lg {{ request()->routeIs('attendance.*') ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200' }}">Kehadiran</a>
+                        <a href="{{ route('admin.attendance') }}" class="block px-3 py-1.5 text-sm rounded-lg {{ request()->routeIs('admin.attendance') ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200' }}">Kehadiran</a>
                         <a href="{{ route('admin.lokasi.index') }}" class="block px-3 py-1.5 text-sm rounded-lg {{ request()->routeIs('admin.lokasi.*') ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200' }}">Lokasi</a>
                         <a href="#" class="block px-3 py-1.5 text-sm rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Laporan</a>
                     </div>

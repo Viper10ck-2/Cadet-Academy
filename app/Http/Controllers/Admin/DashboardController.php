@@ -110,4 +110,21 @@ class DashboardController extends Controller
             ]),
         };
     }
+
+    public function attendance(Request $request): View
+    {
+        $query = Attendance::with('user')->latest();
+
+        if ($request->filled('date')) {
+            $query->whereDate('created_at', $request->date);
+        }
+        if ($request->filled('class_id')) {
+            $query->whereHas('user.classes', fn($q) => $q->where('class_id', $request->class_id));
+        }
+
+        $attendances = $query->paginate(20);
+        $classes = \App\Models\SchoolClass::where('is_active', true)->get();
+
+        return view('admin.attendance.index', compact('attendances', 'classes'));
+    }
 }
