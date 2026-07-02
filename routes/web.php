@@ -16,14 +16,16 @@ $isAbsen = request()->getHost() === 'absen.' . env('APP_DOMAIN', 'cadet-academy.
 
 if ($isAbsen) {
     Route::get('/', function () {
-        if (auth()->check()) return redirect()->route('absen.dashboard');
+        $user = auth()->user();
+        if ($user && !$user->hasRole('cadet')) return redirect('/');
+        if ($user) return redirect()->route('absen.dashboard');
         return view('absen.login');
     })->name('absen.login');
 
     Route::get('/login', fn() => view('absen.login'))->name('login');
     Route::post('/login', [App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'store']);
 
-    Route::middleware('auth')->group(function () {
+    Route::middleware(['auth', 'role:cadet'])->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\AbsenController::class, 'dashboard'])->name('absen.dashboard');
         Route::post('/store', [App\Http\Controllers\AbsenController::class, 'store'])->name('absen.store');
         Route::get('/history', [App\Http\Controllers\AbsenController::class, 'history'])->name('absen.history');
