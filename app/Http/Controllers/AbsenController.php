@@ -40,7 +40,7 @@ class AbsenController extends Controller
 
         // 1. Validate schedule
         $todayName = strtolower(now()->locale('id')->dayName);
-        $classIds = $user->classes()->pluck('id');
+        $classIds = $user->classes()->pluck('classes.id');
         $activeSchedule = Schedule::whereIn('class_id', $classIds)
             ->where('day', $todayName)
             ->whereTime('start_time', '<=', now()->format('H:i:s'))
