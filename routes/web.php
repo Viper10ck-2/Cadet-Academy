@@ -20,6 +20,8 @@ if ($isAbsen) {
         return view('absen.login');
     })->name('absen.login');
 
+    Route::get('/login', fn() => view('absen.login'))->name('login');
+
     Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\AbsenController::class, 'dashboard'])->name('absen.dashboard');
         Route::post('/store', [App\Http\Controllers\AbsenController::class, 'store'])->name('absen.store');
