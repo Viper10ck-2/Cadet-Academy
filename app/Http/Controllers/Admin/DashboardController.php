@@ -30,7 +30,7 @@ class DashboardController extends Controller
                 ->where('start_time', '<=', now())
                 ->where('end_time', '>=', now())
                 ->count(),
-            'notifikasi' => auth()->user()->unreadNotifications()->count(),
+            'notifikasi' => auth()->user()?->unreadNotifications()->count() ?? 0,
         ];
 
         // Chart data: users by role
