@@ -12,6 +12,15 @@
 /public/build
 /public/hot
 
+# Laravel cache (prevent stale cached data in Docker image)
+/bootstrap/cache/*
+!/bootstrap/cache/.gitkeep
+/storage/framework/cache/*
+/storage/framework/views/*
+/storage/framework/sessions/*
+/storage/logs/*
+!storage/logs/.gitkeep
+
 # IDE
 /.fleet
 /.idea
