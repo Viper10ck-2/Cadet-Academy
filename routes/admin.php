@@ -3,7 +3,7 @@
 use App\Http\Controllers\Admin\CrudController;
 use App\Models\{Guardian, SchoolClass, Schedule, Material, Assignment, Certificate,
     Invoice, Payment, Lead, Campaign, Broadcast, Testimonial,
-    BlogPost, Faq, Banner, Setting, AuditLog};
+    BlogPost, Faq, Banner, Setting, AuditLog, Official};
 use Illuminate\Support\Facades\Route;
 
 // Macro to register CRUD routes
@@ -108,6 +108,9 @@ crudRoutes('keuangan/pembayaran', Payment::class,
     ['invoice_id', 'amount', 'method', 'reference', 'status'],
     ['payment_number' => 'No. Pembayaran', 'invoice_id' => 'Invoice', 'amount' => 'Jumlah', 'method' => 'Metode', 'status' => 'Status'], 'Pembayaran');
 
+// Alias: redirect legacy invoice route
+Route::redirect('/admin/keuangan/invoice', '/admin/keuangan/tagihan')->name('admin.keuangan.invoice.index');
+
 // 📢 CRM
 crudRoutes('crm/leads', Lead::class,
     ['name', 'email', 'phone', 'source', 'status', 'notes'],
@@ -150,3 +153,8 @@ crudRoutes('settings/payment-gateway', Setting::class,
 crudRoutes('settings/audit-log', AuditLog::class,
     ['action', 'model_type', 'ip_address'],
     ['user_id' => 'User', 'action' => 'Aksi', 'model_type' => 'Model', 'created_at' => 'Waktu'], 'Audit Log');
+
+// 👥 Pejabat
+crudRoutes('website/pejabat', Official::class,
+    ['name', 'position', 'photo', 'order', 'is_active'],
+    ['name' => 'Nama', 'position' => 'Jabatan', 'order' => 'Urutan', 'is_active' => 'Aktif'], 'Pejabat');

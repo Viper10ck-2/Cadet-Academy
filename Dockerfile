@@ -45,6 +45,11 @@ RUN mkdir -p /app/bootstrap/cache \
     && chmod -R 775 /app/storage \
     && chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
+# Clear Laravel caches (avoid stale cached config/routes/views)
+RUN php artisan config:clear \
+    && php artisan route:clear \
+    && php artisan view:clear
+
 # Copy start script
 COPY docker/start.sh /start.sh
 RUN chmod +x /start.sh
