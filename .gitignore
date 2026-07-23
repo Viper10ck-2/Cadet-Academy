@@ -31,6 +31,7 @@ yarn-error.log
 
 # Bootstrap cache
 /bootstrap/cache/*
+!/bootstrap/cache/.gitkeep
 
 # System prompts / leaks
 /system_prompts_leaks
