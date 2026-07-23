@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libzip-dev \
     unzip \
     && docker-php-ext-install -j$(nproc) pdo_pgsql zip \
+    && rm -f /etc/nginx/sites-enabled/default \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -48,7 +49,8 @@ RUN mkdir -p /app/bootstrap/cache \
 # Clear Laravel caches (avoid stale cached config/routes/views)
 RUN php artisan config:clear \
     && php artisan route:clear \
-    && php artisan view:clear
+    && php artisan view:clear \
+    && php artisan storage:link
 
 # Copy start script
 COPY docker/start.sh /start.sh
