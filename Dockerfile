@@ -17,7 +17,9 @@ FROM php:8.4-fpm
 RUN apt-get update && apt-get install -y --no-install-recommends \
     nginx \
     libpq-dev \
-    && docker-php-ext-install -j$(nproc) pdo_pgsql \
+    libzip-dev \
+    unzip \
+    && docker-php-ext-install -j$(nproc) pdo_pgsql zip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
