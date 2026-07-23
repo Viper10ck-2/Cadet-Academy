@@ -2,12 +2,14 @@ import './bootstrap';
 
 // Alpine.js
 import Alpine from 'alpinejs';
+import collapse from '@alpinejs/collapse';
+Alpine.plugin(collapse);
 window.Alpine = Alpine;
 Alpine.start();
 
 // Register PWA Service Worker
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
+if ('serviceWorker' in navigator && window.isSecureContext) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
 }
 
 // Simple-DataTables initialization helper

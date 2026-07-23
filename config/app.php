@@ -36,6 +36,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application Domain
+    |--------------------------------------------------------------------------
+    |
+    | This value is the domain of your application. This is used for
+    | subdomain detection in authentication and session management.
+    |
+    */
+
+    'domain' => env('APP_DOMAIN', 'localhost'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     */

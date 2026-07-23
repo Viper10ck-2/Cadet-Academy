@@ -1,0 +1,100 @@
+# Implementation Plan
+
+- [ ] 1. Write bug condition exploration test
+  - **Property 1: Bug Condition** - Login Form CSRF 419 Error with Wildcard Domain
+  - **CRITICAL**: This test MUST FAIL on unfixed code - failure confirms the bug exists
+  - **DO NOT attempt to fix the test or the code when it fails**
+  - **NOTE**: This test encodes the expected behavior - it will validate the fix when it passes after implementation
+  - **GOAL**: Surface counterexamples that demonstrate the bug exists
+  - **Scoped PBT Approach**: For deterministic bugs, scope the property to the concrete failing case(s) to ensure reproducibility
+  - Test that login form submission with `SESSION_DOMAIN=.cadet-academy.test` (wildcard domain) results in 419 Page Expired error
+  - Test implementation details:
+    - Set `SESSION_DOMAIN=.cadet-academy.test` in environment config
+    - Submit POST request to `/login` with valid credentials and CSRF token
+    - Assert response status is 419 (TokenMismatchException)
+    - Verify session cookie is NOT stored in browser/response
+    - Test for both main app (`cadet-academy.test/login`) and absen app (`absen.cadet-academy.test/login`)
+  - The test assertions should match the Expected Behavior Properties from design: after fix, status should be 302 (redirect), CSRF token should be validated, session cookie should exist
+  - Run test on UNFIXED code (with `SESSION_DOMAIN=.cadet-academy.test`)
+  - **EXPECTED OUTCOME**: Test FAILS (this is correct - it proves the bug exists)
+  - Document counterexamples found to understand root cause:
+    - Example: POST to `/login` with credentials returns 419 instead of 302 redirect
+    - Example: Browser DevTools shows no session cookie stored
+    - Example: Database `sessions` table has no records after login attempt
+  - Mark task complete when test is written, run, and failure is documented
+  - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6_
+
+- [ ] 2. Write preservation property tests (BEFORE implementing fix)
+  - **Property 2: Preservation** - Existing Session and Auth Behavior
+  - **IMPORTANT**: Follow observation-first methodology
+  - Observe behavior on UNFIXED code for non-buggy inputs (requests that are NOT login form submissions)
+  - Write property-based tests capturing observed behavior patterns from Preservation Requirements:
+    - Test that authenticated users can access protected routes without logout
+    - Test that session lifetime (120 minutes) works correctly
+    - Test that logout invalidates session and regenerates token
+    - Test that other forms with CSRF protection (edit profile, submit exam, etc.) can be submitted successfully
+    - Test that redirect after successful login works (dashboard for main app, absen dashboard for absen app)
+    - Test that session data is stored in database correctly with `SESSION_DRIVER=database`
+    - Test that session configuration (`SESSION_LIFETIME`, `SESSION_PATH`, `SESSION_ENCRYPT`, `SESSION_SECURE_COOKIE`, `SESSION_SAME_SITE`) remains unchanged
+  - Property-based testing generates many test cases for stronger guarantees
+  - Run tests on UNFIXED code
+  - **EXPECTED OUTCOME**: Tests PASS (this confirms baseline behavior to preserve)
+  - Mark task complete when tests are written, run, and passing on unfixed code
+  - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11_
+
+- [ ] 3. Fix for Login 419 Page Expired - Remove Wildcard SESSION_DOMAIN
+
+  - [ ] 3.1 Implement the fix
+    - Open `.env` file
+    - Locate the line `SESSION_DOMAIN=.cadet-academy.test`
+    - Change to `SESSION_DOMAIN=` (empty/blank value) OR remove the line entirely
+    - Save the file
+    - Verify other session configurations remain unchanged:
+      - `SESSION_DRIVER=database`
+      - `SESSION_LIFETIME=120`
+      - `SESSION_SECURE_COOKIE=false`
+      - `SESSION_PATH=/`
+      - `SESSION_ENCRYPT=false`
+    - Clear application cache: `php artisan config:clear` and `php artisan cache:clear`
+    - _Bug_Condition: isBugCondition(request) where request.method == 'POST' AND request.path IN ['/login', '/absen/login'] AND SESSION_DOMAIN startsWith '.' AND browserCannotStoreSessionCookie()_
+    - _Expected_Behavior: After SESSION_DOMAIN is removed/emptied, each subdomain (cadet-academy.test and absen.cadet-academy.test) will have independent session cookies with specific domains (no wildcard), allowing browser to store cookies correctly and CSRF token validation to succeed_
+    - _Preservation: All non-login-form requests (authenticated user access, session lifetime, logout, other forms, redirects, database session storage) must maintain existing behavior without changes_
+    - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11_
+
+  - [ ] 3.2 Verify bug condition exploration test now passes
+    - **Property 1: Expected Behavior** - Login Form CSRF Token Validation Success
+    - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
+    - The test from task 1 encodes the expected behavior
+    - When this test passes, it confirms the expected behavior is satisfied
+    - Run bug condition exploration test from step 1 with fixed environment (SESSION_DOMAIN empty/removed)
+    - **EXPECTED OUTCOME**: Test PASSES (confirms bug is fixed)
+    - Verify:
+      - POST to `/login` with valid credentials returns 302 redirect (not 419)
+      - Session cookie exists in browser with specific domain (e.g., `cadet-academy.test` not `.cadet-academy.test`)
+      - CSRF token is validated successfully
+      - Login succeeds and redirects to dashboard
+      - Same behavior for absen app login at `/absen/login`
+    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7_
+
+  - [ ] 3.3 Verify preservation tests still pass
+    - **Property 2: Preservation** - Existing Session and Auth Behavior
+    - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
+    - Run preservation property tests from step 2
+    - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
+    - Confirm all tests still pass after fix:
+      - Authenticated users can still access protected routes
+      - Session lifetime still works (120 minutes)
+      - Logout still works correctly
+      - Other forms with CSRF protection still work
+      - Redirects after login still work
+      - Database session storage still works
+      - Session configuration remains unchanged
+    - Verify no regressions introduced by the fix
+    - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11_
+
+- [ ] 4. Checkpoint - Ensure all tests pass
+  - Run all tests (bug condition test and preservation tests)
+  - Verify all tests pass with fixed code
+  - If any test fails, investigate and fix before proceeding
+  - If questions or issues arise during testing, ask the user for clarification
+  - Document final test results and confirm fix is complete

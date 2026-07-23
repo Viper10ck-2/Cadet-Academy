@@ -11,6 +11,7 @@ class Question extends Model
         'exam_id',
         'question_text',
         'type',
+        'category',
         'options',
         'correct_answer',
         'points',
@@ -32,5 +33,28 @@ class Question extends Model
     public function getOptionsArrayAttribute(): array
     {
         return $this->options ?? [];
+    }
+
+    public function getCategoryLabelAttribute(): string
+    {
+        return match ($this->category) {
+            'TIU' => 'Tes Intelegensi Umum',
+            'TWK' => 'Tes Wawasan Kebangsaan',
+            'TKP' => 'Tes Karakteristik Pribadi',
+            'TBI' => 'Tes Bahasa Inggris',
+            default => 'Tidak Diklasifikasikan',
+        };
+    }
+
+    public function getCategoryBadgeAttribute(): string
+    {
+        $colors = [
+            'TIU' => 'blue',
+            'TWK' => 'red',
+            'TKP' => 'green',
+            'TBI' => 'amber',
+        ];
+        $color = $colors[$this->category] ?? 'gray';
+        return "<span class=\"text-xs font-medium px-2 py-0.5 rounded bg-{$color}-100 text-{$color}-700 dark:bg-{$color}-900/30 dark:text-{$color}-400\">{$this->category}</span>";
     }
 }

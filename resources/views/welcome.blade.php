@@ -24,8 +24,22 @@
                     <span class="font-display font-bold text-lg" :class="scrolled ? 'text-navy' : 'text-white'">Cadet Academy</span>
                 </a>
                 <div class="flex items-center gap-4">
-                    <a href="{{ route('login') }}" class="text-sm font-medium transition-colors" :class="scrolled ? 'text-gray-600 hover:text-navy' : 'text-white/80 hover:text-white'">Log in</a>
-                    <a href="{{ route('register') }}" class="bg-gold text-navy px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gold-600 transition-all shadow-lg shadow-gold/30 inline-flex items-center gap-2">Mulai Gratis</a>
+                    @auth
+                        @php
+                            $dashboardRoute = match(true) {
+                                auth()->user()->hasRole('admin') => route('admin.dashboard'),
+                                auth()->user()->hasRole('instructor') => route('instructor.dashboard'),
+                                auth()->user()->hasRole('cadet') => route('cadet.dashboard'),
+                                default => route('dashboard'),
+                            };
+                        @endphp
+                        <a href="{{ $dashboardRoute }}" class="bg-gold text-navy px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gold-600 transition-all shadow-lg shadow-gold/30 inline-flex items-center gap-2">
+                            Dashboard
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}" class="text-sm font-medium transition-colors" :class="scrolled ? 'text-gray-600 hover:text-navy' : 'text-white/80 hover:text-white'">Log in</a>
+                        <a href="{{ route('register') }}" class="bg-gold text-navy px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gold-600 transition-all shadow-lg shadow-gold/30 inline-flex items-center gap-2">Mulai Gratis</a>
+                    @endauth
                 </div>
             </div>
         </div>
@@ -80,6 +94,91 @@
                     <p class="text-gray-500 mt-2 leading-relaxed">Dapatkan sertifikat resmi setelah menyelesaikan setiap program.</p>
                 </div>
             </div>
+        </div>
+    </section>
+
+    {{-- Pejabat / Officials Section --}}
+    <section id="pejabat" class="py-20 lg:py-28 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <span class="text-xs font-semibold uppercase tracking-widest text-navy-500 bg-navy-50 px-4 py-1.5 rounded-full">Struktur Organisasi</span>
+                <h2 class="font-display text-3xl sm:text-4xl font-bold text-navy mt-4">Pejabat Cadet Academy</h2>
+                <p class="text-gray-500 mt-4 text-lg">Dipimpin oleh para profesional berpengalaman di bidangnya</p>
+            </div>
+
+            @php
+                $kepala = $officials->firstWhere('position', 'Kepala Cadet Academy');
+                $sekretaris = $officials->firstWhere('position', 'Sekretaris');
+                $kasubbags = $officials->filter(fn($o) => str_starts_with($o->position, 'Kasubbag'))->values();
+                $bidangs = $officials->filter(fn($o) => str_contains($o->position, 'Bidang'))->values();
+            @endphp
+
+            {{-- Kepala --}}
+            @if($kepala)
+            <div class="flex justify-center mb-10">
+                <div class="text-center max-w-xs animate-fade-up">
+                    <div class="relative inline-block">
+                        <div class="w-32 h-32 mx-auto rounded-2xl overflow-hidden ring-4 ring-gold/40 shadow-xl shadow-gold/10">
+                            <img src="{{ $kepala->photo_url }}" alt="{{ $kepala->name }}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="absolute -bottom-3 inset-x-0 flex justify-center">
+                            <span class="bg-gold text-navy text-[10px] font-bold px-3 py-1 rounded-full shadow">⭐ Kepala</span>
+                        </div>
+                    </div>
+                    <h3 class="font-display font-bold text-lg text-navy mt-6">{{ $kepala->name }}</h3>
+                    <p class="text-gold-600 font-semibold text-xs mt-1">{{ $kepala->position }}</p>
+                </div>
+            </div>
+            @endif
+
+            {{-- Sekretaris --}}
+            @if($sekretaris)
+            <div class="flex justify-center mb-12">
+                <div class="text-center max-w-xs animate-fade-up">
+                    <div class="w-28 h-28 mx-auto rounded-2xl overflow-hidden ring-2 ring-gray-200 shadow-sm">
+                        <img src="{{ $sekretaris->photo_url }}" alt="{{ $sekretaris->name }}" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-display font-bold text-base text-navy mt-4">{{ $sekretaris->name }}</h3>
+                    <p class="text-gray-500 font-medium text-xs mt-1">{{ $sekretaris->position }}</p>
+                </div>
+            </div>
+            @endif
+
+            {{-- Kasubbag --}}
+            @if($kasubbags->count() > 0)
+            <div class="text-center mb-2">
+                <span class="text-[10px] font-semibold uppercase tracking-widest text-gray-400 bg-gray-50 px-3 py-1 rounded-full">Kasubbag</span>
+            </div>
+            <div class="flex flex-wrap justify-center gap-6 lg:gap-12 mb-12">
+                @foreach($kasubbags as $official)
+                <div class="text-center max-w-[180px] animate-fade-up">
+                    <div class="w-24 h-24 mx-auto rounded-2xl overflow-hidden ring-2 ring-gray-100 shadow-sm">
+                        <img src="{{ $official->photo_url }}" alt="{{ $official->name }}" class="w-full h-full object-cover">
+                    </div>
+                    <h4 class="font-semibold text-sm text-navy mt-3 leading-tight">{{ $official->name }}</h4>
+                    <p class="text-xs text-gray-500 mt-1">{{ $official->position }}</p>
+                </div>
+                @endforeach
+            </div>
+            @endif
+
+            {{-- Bidang --}}
+            @if($bidangs->count() > 0)
+            <div class="text-center mb-2">
+                <span class="text-[10px] font-semibold uppercase tracking-widest text-gray-400 bg-gray-50 px-3 py-1 rounded-full">Bidang</span>
+            </div>
+            <div class="flex flex-wrap justify-center gap-6 lg:gap-8">
+                @foreach($bidangs as $official)
+                <div class="text-center max-w-[180px] animate-fade-up">
+                    <div class="w-24 h-24 mx-auto rounded-2xl overflow-hidden ring-2 ring-gray-100 shadow-sm">
+                        <img src="{{ $official->photo_url }}" alt="{{ $official->name }}" class="w-full h-full object-cover">
+                    </div>
+                    <h4 class="font-semibold text-sm text-navy mt-3 leading-tight">{{ $official->name }}</h4>
+                    <p class="text-xs text-gray-500 mt-1">{{ $official->position }}</p>
+                </div>
+                @endforeach
+            </div>
+            @endif
         </div>
     </section>
 

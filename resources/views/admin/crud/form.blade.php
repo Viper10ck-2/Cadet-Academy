@@ -20,7 +20,16 @@
             @elseif(Str::contains($field, ['date', 'time', 'at']))
                 <input type="datetime-local" name="{{ $field }}" value="{{ $val instanceof \DateTime ? $val->format('Y-m-d\TH:i') : $val }}" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500">
             @elseif(Str::contains($field, ['file', 'photo', 'image', 'avatar', 'path']))
-                <input type="text" name="{{ $field }}" value="{{ $val }}" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500">
+                @if($item?->$field)
+                <div class="mb-2">
+                    <img src="{{ Str::startsWith($val, 'http') ? $val : asset('storage/'.$val) }}" class="w-24 h-24 rounded-xl object-cover border">
+                </div>
+                @endif
+                <input type="file" name="{{ $field }}" accept="image/*" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                @if($item?->$field)
+                <input type="hidden" name="old_{{ $field }}" value="{{ $val }}">
+                <p class="text-xs text-gray-400 mt-1">Biarkan kosong jika tidak ingin mengganti foto</p>
+                @endif
             @else
                 <input type="text" name="{{ $field }}" value="{{ $val }}" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500">
             @endif

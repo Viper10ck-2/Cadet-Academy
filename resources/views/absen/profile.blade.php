@@ -1,7 +1,7 @@
 @extends('layouts.absen')
 @section('title','Profil')
 @section('content')
-<div class="flex-1 navy-gradient px-5 pt-8">
+<div class="flex-1 navy-gradient px-5 pt-8 overflow-y-auto">
     <div class="text-center mb-8">
         <img src="{{ $user->avatar_url }}" class="w-24 h-24 rounded-full mx-auto border-4 border-[#D4A853] shadow-lg mb-3">
         <h2 class="text-xl font-bold text-white">{{ $user->name }}</h2>
@@ -17,6 +17,7 @@
 
     <form method="POST" action="{{ route('logout') }}" class="mt-4">
         @csrf
+        <input type="hidden" name="absen" value="1">
         <button class="w-full py-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 font-medium text-sm hover:bg-red-500/20">🚪 Keluar</button>
     </form>
 </div>

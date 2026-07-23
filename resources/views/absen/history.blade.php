@@ -1,7 +1,7 @@
 @extends('layouts.absen')
 @section('title','Riwayat Absensi')
 @section('content')
-<div class="flex-1 navy-gradient px-5 pt-8">
+<div class="flex-1 navy-gradient px-5 pt-8 overflow-y-auto">
     <h2 class="text-xl font-bold text-white mb-6">📅 Riwayat Absensi</h2>
     <div class="space-y-3">
         @forelse($attendances as $date => $items)

@@ -2,63 +2,131 @@
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ExamController as AdminExamController;
+use App\Http\Controllers\Admin\QuestionBankController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\CbtController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Services\RoleRouter;
 
-// 📸 Absen Subdomain (absen.cadet-academy.test) OR port 8080
-$isAbsen = request()->server('HTTP_X_APP_TYPE') === 'absen'
-        || request()->getPort() === 8080
-        || request()->getHost() === 'absen.' . env('APP_DOMAIN', 'cadet-academy.test');
-
-if ($isAbsen) {
-    Route::get('/', function () {
-        $user = auth()->user();
-        if ($user && !$user->hasRole('cadet')) return redirect('/');
-        if ($user) return redirect()->route('absen.dashboard');
-        return view('absen.login');
-    })->name('absen.login');
-
-    Route::get('/login', fn() => view('absen.login'))->name('login');
-    Route::post('/login', [App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'store']);
-    Route::get('/dashboard', fn() => redirect()->route('absen.dashboard'))->name('dashboard');
-    Route::post('/logout', [App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'destroy'])->name('logout');
-
-    Route::middleware(['auth', 'role:cadet'])->group(function () {
-        Route::get('/dashboard', [App\Http\Controllers\AbsenController::class, 'dashboard'])->name('absen.dashboard');
-        Route::post('/store', [App\Http\Controllers\AbsenController::class, 'store'])->name('absen.store');
-        Route::get('/history', [App\Http\Controllers\AbsenController::class, 'history'])->name('absen.history');
-        Route::get('/profile', [App\Http\Controllers\AbsenController::class, 'profile'])->name('absen.profile');
-    });
-}
-
-// Main App Routes (only when NOT absen)
-else {
-
+// 📸 Home Route - Context-aware (Absen or Main App)
 Route::get('/', function () {
-    return view('welcome');
+    $roleRouter = app(RoleRouter::class);
+    $isAbsen = $roleRouter->isAbsenContext(request());
+    
+    if ($isAbsen) {
+        $user = auth()->user();
+        if ($user && !$user->hasRole('cadet')) return redirect('/?absen=1');
+        if ($user) return redirect()->route('absen.dashboard', ['absen' => 1]);
+        return view('absen.login');
+    }
+    
+    // Main app home
+    $officials = \App\Models\Official::where('is_active', true)->orderBy('order')->get();
+    return view('welcome', compact('officials'));
 });
 
+// Login Route - Context-aware
+Route::get('/login', function () {
+    $roleRouter = app(RoleRouter::class);
+    $isAbsen = $roleRouter->isAbsenContext(request());
+    
+    if ($isAbsen) {
+        return view('absen.login');
+    }
+    
+    // Main app uses auth routes
+    return view('auth.login');
+})->name('login');
+
+Route::post('/login', [App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'store']);
+Route::post('/logout', [App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+// Absen-specific authenticated routes (Cadet only)
+Route::middleware(['auth', 'role:cadet'])->group(function () {
+    // Dashboard route - handles both absen and main app contexts
+    Route::get('/dashboard', function () {
+        $roleRouter = app(RoleRouter::class);
+        $isAbsen = $roleRouter->isAbsenContext(request());
+        
+        if ($isAbsen) {
+            return app(App\Http\Controllers\AbsenController::class)->dashboard();
+        }
+        
+        // Main app - redirect to cadet dashboard
+        return redirect()->route('cadet.dashboard');
+    })->name('absen.dashboard');
+    
+    // Absen store route
+    Route::post('/store', [App\Http\Controllers\AbsenController::class, 'store'])->name('absen.store');
+    
+    // History route - absen context only
+    Route::get('/history', function () {
+        $roleRouter = app(RoleRouter::class);
+        $isAbsen = $roleRouter->isAbsenContext(request());
+        
+        if ($isAbsen) {
+            return app(App\Http\Controllers\AbsenController::class)->history();
+        }
+        
+        return redirect('/');
+    })->name('absen.history');
+    
+    // Profile route - absen context only  
+    Route::get('/profile', function () {
+        $roleRouter = app(RoleRouter::class);
+        $isAbsen = $roleRouter->isAbsenContext(request());
+        
+        if ($isAbsen) {
+            return app(App\Http\Controllers\AbsenController::class)->profile();
+        }
+        
+        return redirect()->route('profile.edit');
+    })->name('absen.profile');
+});
+
+// Main App Routes
 // PWA Offline page
 Route::get('/offline', function () {
     return view('offline');
 })->name('offline');
 
+// Quick login for testing (bypass verified)
+Route::get('/quick-login/{email}', function ($email) {
+    if (!app()->environment('local')) abort(404);
+    $user = \App\Models\User::where('email', $email)->first();
+    if ($user) {
+        auth()->login($user);
+        // Use RoleRouter for consistent redirect logic
+        $roleRouter = app(\App\Services\RoleRouter::class);
+        $dashboardUrl = $roleRouter->getDashboardUrl($user, request());
+        return redirect($dashboardUrl);
+    }
+    return 'User not found';
+});
+
+// Main dashboard redirect for non-cadet users
 Route::get('/dashboard', function () {
     $user = auth()->user();
-    if ($user->hasRole('admin')) return redirect()->route('admin.dashboard');
-    if ($user->hasRole('instructor')) return redirect()->route('instructor.dashboard');
-    if ($user->hasRole('cadet')) return redirect()->route('cadet.dashboard');
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+    
+    // If cadet, use the absen.dashboard route which handles context
+    if ($user->hasRole('cadet')) {
+        return redirect()->route('absen.dashboard', request()->query());
+    }
+    
+    // Use RoleRouter for other roles
+    $roleRouter = app(\App\Services\RoleRouter::class);
+    $dashboardUrl = $roleRouter->getDashboardUrl($user, request());
+    return redirect($dashboardUrl);
+})->middleware(['auth'])->name('dashboard');
 
 // Profile
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
@@ -79,6 +147,16 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('exams/{exam}/questions/{question}', [AdminExamController::class, 'updateQuestion'])->name('exams.questions.update');
     Route::delete('exams/{exam}/questions/{question}', [AdminExamController::class, 'destroyQuestion'])->name('exams.questions.destroy');
     Route::get('exams/{exam}/results', [AdminExamController::class, 'results'])->name('exams.results');
+    Route::get('exams/{exam}/tokens', [AdminExamController::class, 'tokens'])->name('exams.tokens');
+    Route::post('exams/{exam}/tokens/{participant}/regenerate', [AdminExamController::class, 'regenerateToken'])->name('exams.tokens.regenerate');
+    Route::post('exams/generate-tryout', [AdminExamController::class, 'generateTryout'])->name('exams.generate-tryout');
+    Route::post('exams/{exam}/start-now', [AdminExamController::class, 'startNow'])->name('exams.start-now');
+
+    // Question Bank (Bank Soal)
+    Route::get('questions', [QuestionBankController::class, 'index'])->name('questions.index');
+    Route::post('questions', [QuestionBankController::class, 'store'])->name('questions.store');
+    Route::put('questions/{question}', [QuestionBankController::class, 'update'])->name('questions.update');
+    Route::delete('questions/{question}', [QuestionBankController::class, 'destroy'])->name('questions.destroy');
 
     // All CRUD sections
     require __DIR__ . '/admin.php';
@@ -104,9 +182,11 @@ Route::middleware(['auth', 'role:cadet'])->prefix('cbt')->name('cbt.')->group(fu
     Route::get('history', [CbtController::class, 'history'])->name('history');
 });
 
-// Attendance routes → redirect to PWA subdomain
+// Attendance routes → redirect to absen app
 Route::middleware('auth')->prefix('attendance')->name('attendance.')->group(function () {
-    Route::get('/', fn() => redirect()->away('https://absen.' . env('APP_DOMAIN', 'cadet-academy.test') . '/dashboard'))->name('index');
+    Route::get('/', function () {
+        return redirect('/?absen=1');
+    })->name('index');
     Route::post('/', [AttendanceController::class, 'store'])->name('store');
 });
 
@@ -152,4 +232,3 @@ Route::middleware(['auth', 'role:cadet'])->prefix('cadet')->name('cadet.')->grou
 
     require __DIR__ . '/auth.php';
 
-} // end else (main app routes)

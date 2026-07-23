@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="min-h-screen">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,12 +12,15 @@
     <style>[x-cloak]{display:none!important}</style>
     @stack('styles')
 </head>
-<body class="h-full bg-gray-50 text-gray-900 dark:bg-navy dark:text-gray-100 font-sans antialiased"
+<body class="min-h-screen bg-gray-50 text-gray-900 dark:bg-navy dark:text-gray-100 font-sans antialiased"
       x-data="{ theme: localStorage.getItem('theme') || 'light', sidebarOpen: window.innerWidth >= 1024, sidebarCollapsed: localStorage.getItem('sidebar') === 'collapsed' }"
-      x-init="$watch('theme', val => { document.documentElement.classList.toggle('dark', val === 'dark'); localStorage.setItem('theme', val); })"
+      x-init="
+          document.documentElement.classList.toggle('dark', theme === 'dark');
+          $watch('theme', val => { document.documentElement.classList.toggle('dark', val === 'dark'); localStorage.setItem('theme', val); });
+      "
       :class="theme === 'dark' ? 'dark' : ''"
       @resize.window="sidebarOpen = window.innerWidth >= 1024">
-    <div class="flex h-full overflow-hidden">
+    <div class="flex min-h-screen overflow-hidden">
         <!-- Overlay mobile -->
         <div x-cloak x-show="sidebarOpen" @click="sidebarOpen = false"
              class="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm lg:hidden transition-opacity"
@@ -27,7 +30,11 @@
 
         <!-- Sidebar -->
         <aside class="fixed inset-y-0 left-0 z-40 flex flex-col bg-navy text-white transition-all duration-300 ease-in-out shadow-2xl shadow-navy/20"
-               :class="sidebarCollapsed ? 'w-20' : 'w-64'"
+               :class="[
+                   sidebarCollapsed ? 'w-20' : 'w-64',
+                   sidebarOpen ? 'translate-x-0' : '-translate-x-full',
+                   'lg:translate-x-0'
+               ]"
                x-init="$watch('sidebarCollapsed', val => localStorage.setItem('sidebar', val ? 'collapsed' : 'expanded'))">
             <!-- Logo -->
             <div class="flex items-center h-16 px-4 border-b border-navy-700/50 shrink-0">
@@ -69,7 +76,7 @@
                 </div>
 
                 {{-- CBT --}}
-                <div x-data="{ open: {{ request()->is('admin/exams*') ? 'true' : 'false' }} }">
+                <div x-data="{ open: {{ request()->is('admin/exams*') || request()->is('admin/questions*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" class="nav-item w-full text-left">
                         <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
                         <span x-show="!sidebarCollapsed" class="flex-1">CBT</span>
@@ -77,6 +84,7 @@
                     </button>
                     <div x-show="open" x-collapse :class="sidebarCollapsed ? 'hidden' : ''" class="ml-2 mt-0.5 space-y-0.5 border-l border-navy-600/50 pl-2">
                         <a href="{{ route('admin.exams.index') }}" class="nav-sub {{ request()->routeIs('admin.exams.*') ? 'nav-sub-active' : '' }}">Ujian</a>
+                        <a href="{{ route('admin.questions.index') }}" class="nav-sub {{ request()->routeIs('admin.questions.*') ? 'nav-sub-active' : '' }}">Bank Soal</a>
                     </div>
                 </div>
 
@@ -107,7 +115,7 @@
                         <svg x-show="!sidebarCollapsed" class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                     <div x-show="open" x-collapse :class="sidebarCollapsed ? 'hidden' : ''" class="ml-2 mt-0.5 space-y-0.5 border-l border-navy-600/50 pl-2">
-                        <a href="{{ route('admin.keuangan.invoice.index') }}" class="nav-sub {{ request()->routeIs('admin.keuangan.invoice.*') ? 'nav-sub-active' : '' }}">Invoice</a>
+                        <a href="{{ route('admin.keuangan.tagihan.index') }}" class="nav-sub {{ request()->routeIs('admin.keuangan.tagihan.*') ? 'nav-sub-active' : '' }}">Tagihan</a>
                         <a href="{{ route('admin.keuangan.pembayaran.index') }}" class="nav-sub {{ request()->routeIs('admin.keuangan.pembayaran.*') ? 'nav-sub-active' : '' }}">Pembayaran</a>
                     </div>
                 </div>
@@ -120,9 +128,10 @@
                         <svg x-show="!sidebarCollapsed" class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                     <div x-show="open" x-collapse :class="sidebarCollapsed ? 'hidden' : ''" class="ml-2 mt-0.5 space-y-0.5 border-l border-navy-600/50 pl-2">
-                        <a href="{{ route('admin.crm.lead.index') }}" class="nav-sub {{ request()->routeIs('admin.crm.lead.*') ? 'nav-sub-active' : '' }}">Leads</a>
+                        <a href="{{ route('admin.crm.leads.index') }}" class="nav-sub {{ request()->routeIs('admin.crm.leads.*') ? 'nav-sub-active' : '' }}">Leads</a>
                         <a href="{{ route('admin.crm.kampanye.index') }}" class="nav-sub {{ request()->routeIs('admin.crm.kampanye.*') ? 'nav-sub-active' : '' }}">Kampanye</a>
                         <a href="{{ route('admin.crm.broadcast.index') }}" class="nav-sub {{ request()->routeIs('admin.crm.broadcast.*') ? 'nav-sub-active' : '' }}">Broadcast</a>
+                        <a href="{{ route('admin.crm.testimoni.index') }}" class="nav-sub {{ request()->routeIs('admin.crm.testimoni.*') ? 'nav-sub-active' : '' }}">Testimoni</a>
                     </div>
                 </div>
 
@@ -137,27 +146,27 @@
                         <a href="{{ route('admin.website.blog.index') }}" class="nav-sub {{ request()->routeIs('admin.website.blog.*') ? 'nav-sub-active' : '' }}">Blog</a>
                         <a href="{{ route('admin.website.faq.index') }}" class="nav-sub {{ request()->routeIs('admin.website.faq.*') ? 'nav-sub-active' : '' }}">FAQ</a>
                         <a href="{{ route('admin.website.banner.index') }}" class="nav-sub {{ request()->routeIs('admin.website.banner.*') ? 'nav-sub-active' : '' }}">Banner</a>
-                        <a href="{{ route('admin.website.testimoni.index') }}" class="nav-sub {{ request()->routeIs('admin.website.testimoni.*') ? 'nav-sub-active' : '' }}">Testimoni</a>
+                        <a href="{{ route('admin.website.pejabat.index') }}" class="nav-sub {{ request()->routeIs('admin.website.pejabat.*') ? 'nav-sub-active' : '' }}">Pejabat</a>
                     </div>
                 </div>
 
                 {{-- Settings --}}
-                <div x-data="{ open: {{ request()->is('admin/pengaturan*') ? 'true' : 'false' }} }">
+                <div x-data="{ open: {{ request()->is('admin/settings*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" class="nav-item w-full text-left">
                         <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         <span x-show="!sidebarCollapsed" class="flex-1">Pengaturan</span>
                         <svg x-show="!sidebarCollapsed" class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                     <div x-show="open" x-collapse :class="sidebarCollapsed ? 'hidden' : ''" class="ml-2 mt-0.5 space-y-0.5 border-l border-navy-600/50 pl-2">
-                        <a href="{{ route('admin.pengaturan.pengaturan.index') }}" class="nav-sub {{ request()->routeIs('admin.pengaturan.pengaturan.*') ? 'nav-sub-active' : '' }}">Pengaturan</a>
-                        <a href="{{ route('admin.pengaturan.audit.index') }}" class="nav-sub {{ request()->routeIs('admin.pengaturan.audit.*') ? 'nav-sub-active' : '' }}">Audit Log</a>
+                        <a href="{{ route('admin.settings.smtp.index') }}" class="nav-sub {{ request()->routeIs('admin.settings.smtp.*') ? 'nav-sub-active' : '' }}">Pengaturan</a>
+                        <a href="{{ route('admin.settings.audit-log.index') }}" class="nav-sub {{ request()->routeIs('admin.settings.audit-log.*') ? 'nav-sub-active' : '' }}">Audit Log</a>
                     </div>
                 </div>
             </nav>
 
             <!-- Sidebar Footer -->
             <div class="p-3 border-t border-navy-700/50 shrink-0">
-                <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-navy-300 hover:text-white hover:bg-navy-700/50 transition-all duration-200">
+                <a href="{{ url('/') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-navy-300 hover:text-white hover:bg-navy-700/50 transition-all duration-200">
                     <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                     <span x-show="!sidebarCollapsed" class="text-sm font-medium">Main Site</span>
                 </a>
@@ -166,8 +175,7 @@
 
         <!-- Main Content Area -->
         <div class="flex-1 flex flex-col min-w-0 transition-all duration-300"
-             :style="sidebarCollapsed ? 'margin-left: 5rem' : 'margin-left: 16rem'"
-             style="margin-left: 16rem">
+             :class="sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'">
 
             <!-- Topbar -->
             <header class="sticky top-0 z-20 bg-white/80 dark:bg-navy-900/80 backdrop-blur-xl border-b border-gray-100 dark:border-navy-700">
@@ -182,16 +190,59 @@
                     <div class="flex items-center gap-2">
                         <!-- Theme Toggle -->
                         <button @click="theme = theme === 'dark' ? 'light' : 'dark'"
-                                class="w-9 h-9 rounded-xl flex items-center justify-center text-gray-500 hover:text-navy hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-navy-800 transition-all duration-200">
+                                x-init="if (!localStorage.getItem('theme')) theme = 'light'; $nextTick(() => document.documentElement.classList.toggle('dark', theme === 'dark'))"
+                                class="w-9 h-9 rounded-xl flex items-center justify-center text-gray-500 hover:text-navy hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-navy-800 transition-all duration-200"
+                                :title="theme === 'dark' ? 'Mode Terang' : 'Mode Gelap'">
                             <svg x-show="theme !== 'dark'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
                             <svg x-show="theme === 'dark'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                         </button>
 
-                        <!-- Notifications -->
-                        <a href="{{ route('notifications.index') }}" class="w-9 h-9 rounded-xl flex items-center justify-center text-gray-500 hover:text-navy hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-navy-800 transition-all duration-200 relative">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                            <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
-                        </a>
+                        <!-- Notifications Popover -->
+                        <div class="relative" x-data="{ open: false, unread: {{ auth()->user()->unreadNotifications->count() ?? 0 }} }" @click.away="open = false">
+                            <button @click="open = !open"
+                                    class="w-9 h-9 rounded-xl flex items-center justify-center text-gray-500 hover:text-navy hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-navy-800 transition-all duration-200 relative">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                                <span x-show="unread > 0" class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-navy-800"></span>
+                            </button>
+                            <!-- Popover -->
+                            <div x-show="open"
+                                 x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+                                 x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-2"
+                                 class="absolute right-0 mt-3 w-80 bg-white dark:bg-navy-800 rounded-2xl shadow-xl shadow-black/10 border border-gray-100 dark:border-navy-700 z-50 overflow-hidden">
+                                <div class="px-5 py-3.5 border-b border-gray-50 dark:border-navy-700 flex items-center justify-between">
+                                    <h4 class="text-sm font-bold text-navy dark:text-white">Notifikasi</h4>
+                                    <div class="flex items-center gap-2">
+                                        <span x-show="unread > 0" class="text-[11px] font-medium text-gold-600 bg-gold-50 dark:bg-gold-900/20 px-2 py-0.5 rounded-full" x-text="unread + ' baru'"></span>
+                                        <a href="{{ route('notifications.mark-all-read') }}" class="text-[11px] text-gray-400 hover:text-navy dark:hover:text-white transition-colors" @click.prevent="fetch('{{ route('notifications.mark-all-read') }}', { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' } }).then(() => unread = 0)">Tandai semua</a>
+                                    </div>
+                                </div>
+                                <div class="max-h-72 overflow-y-auto divide-y divide-gray-50 dark:divide-navy-700">
+                                    @forelse(auth()->user()->notifications->take(5) as $notif)
+                                    <a href="{{ $notif->data['url'] ?? '#' }}" class="flex gap-3 px-5 py-3.5 hover:bg-gray-50/50 dark:hover:bg-navy-700/50 transition-colors block">
+                                        <div class="w-8 h-8 rounded-xl bg-navy-50 dark:bg-navy-700 flex items-center justify-center shrink-0 mt-0.5">
+                                            <svg class="w-4 h-4 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-[13px] font-medium text-navy dark:text-white leading-snug">{{ $notif->data['title'] ?? 'Notifikasi' }}</p>
+                                            <p class="text-[12px] text-gray-400 dark:text-gray-500 mt-0.5 truncate">{{ $notif->data['message'] ?? '' }}</p>
+                                            <p class="text-[10px] text-gray-300 dark:text-gray-600 mt-1">{{ $notif->created_at->diffForHumans() }}</p>
+                                        </div>
+                                        @if(is_null($notif->read_at))
+                                        <div class="w-2 h-2 rounded-full bg-gold-500 shrink-0 mt-2"></div>
+                                        @endif
+                                    </a>
+                                    @empty
+                                    <div class="px-5 py-8 text-center">
+                                        <svg class="w-10 h-10 text-gray-200 dark:text-navy-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                                        <p class="text-sm text-gray-400 dark:text-gray-500">Belum ada notifikasi</p>
+                                    </div>
+                                    @endforelse
+                                </div>
+                                <div class="px-5 py-3 border-t border-gray-50 dark:border-navy-700 text-center">
+                                    <a href="{{ route('notifications.index') }}" class="text-[13px] font-semibold text-gold-600 dark:text-gold-400 hover:text-gold transition-colors">Lihat semua notifikasi</a>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- Profile Dropdown -->
                         <div class="relative" x-data="{ open: false }" @click.away="open = false">

@@ -10,6 +10,9 @@ class Exam extends Model
 {
     protected $fillable = [
         'title',
+        'type',
+        'participant_ids',
+        'question_composition',
         'description',
         'duration_minutes',
         'passing_score',
@@ -29,6 +32,8 @@ class Exam extends Model
             'is_active' => 'boolean',
             'shuffle_questions' => 'boolean',
             'show_result' => 'boolean',
+            'participant_ids' => 'array',
+            'question_composition' => 'array',
         ];
     }
 

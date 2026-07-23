@@ -1,7 +1,7 @@
 @extends('layouts.absen')
 @section('title','Dashboard Absensi')
 @section('content')
-<div class="flex-1 navy-gradient" x-data="absenApp()">
+<div class="flex-1 navy-gradient overflow-y-auto" x-data="absenApp()">
     {{-- Header --}}
     <div class="px-5 pt-8 pb-6 text-center">
         <img src="{{ $user->avatar_url }}" class="w-20 h-20 rounded-full mx-auto border-4 border-[#D4A853] shadow-lg mb-3">

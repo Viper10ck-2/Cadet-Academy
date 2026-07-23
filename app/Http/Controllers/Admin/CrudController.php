@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class CrudController extends Controller
@@ -46,6 +47,14 @@ class CrudController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->only($this->fillable);
+        
+        // Handle file uploads for photo/image fields
+        foreach ($this->fillable as $field) {
+            if ($request->hasFile($field)) {
+                $data[$field] = $request->file($field)->store('uploads', 'public');
+            }
+        }
+        
         $this->modelClass::create($data);
 
         return redirect()->route($this->routePrefix . '.index')
@@ -67,7 +76,27 @@ class CrudController extends Controller
     public function update(Request $request, int $id): RedirectResponse
     {
         $item = $this->modelClass::findOrFail($id);
-        $item->update($request->only($this->fillable));
+        $data = $request->only($this->fillable);
+        
+        // Handle file uploads for photo/image fields only
+        $fileFields = ['photo', 'image', 'avatar', 'file_path', 'file', 'path', 'proof_path'];
+        foreach ($this->fillable as $field) {
+            if (!in_array($field, $fileFields) && !Str::contains($field, ['photo', 'image', 'avatar', 'file', 'path'])) {
+                continue;
+            }
+            if ($request->hasFile($field)) {
+                // Delete old file if exists
+                if ($item->$field && \Storage::disk('public')->exists($item->$field)) {
+                    \Storage::disk('public')->delete($item->$field);
+                }
+                $data[$field] = $request->file($field)->store('uploads', 'public');
+            } else {
+                // Keep old value, remove from update data
+                unset($data[$field]);
+            }
+        }
+        
+        $item->update($data);
 
         return redirect()->route($this->routePrefix . '.index')
             ->with('status', 'Data berhasil diperbarui!');

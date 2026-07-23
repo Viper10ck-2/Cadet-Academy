@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="min-h-screen">
 <head>
     <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}"><meta name="theme-color" content="#0F172A">
@@ -13,12 +13,12 @@
     .nav-inst-active{background:rgba(255,255,255,.12);color:#fff;font-weight:600}
     </style>
 </head>
-<body class="h-full bg-gray-50 text-gray-900 dark:bg-navy dark:text-gray-100 font-sans antialiased"
+<body class="min-h-screen bg-gray-50 text-gray-900 dark:bg-navy dark:text-gray-100 font-sans antialiased"
       x-data="{ theme: localStorage.getItem('theme') || 'light', sidebarOpen: window.innerWidth >= 1024 }"
       x-init="$watch('theme', val => { document.documentElement.classList.toggle('dark', val === 'dark'); localStorage.setItem('theme', val); })"
       :class="theme === 'dark' ? 'dark' : ''"
       @resize.window="sidebarOpen = window.innerWidth >= 1024">
-    <div class="flex h-full overflow-hidden">
+    <div class="flex min-h-screen overflow-hidden">
         <div x-cloak x-show="sidebarOpen" @click="sidebarOpen = false"
              class="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm lg:hidden" x-transition></div>
         <aside class="fixed inset-y-0 left-0 z-40 flex flex-col w-64 bg-gradient-to-b from-emerald-900 to-emerald-950 text-white shadow-2xl transform transition-transform duration-300 -translate-x-full lg:translate-x-0 lg:static lg:z-auto"
@@ -78,7 +78,7 @@
                 </form>
             </div>
         </aside>
-        <div class="flex-1 flex flex-col min-w-0" style="margin-left:16rem">
+        <div class="flex-1 flex flex-col min-w-0 lg:ml-64">
             <header class="sticky top-0 z-20 bg-white/80 dark:bg-navy-900/80 backdrop-blur-xl border-b border-gray-100 dark:border-navy-700">
                 <div class="flex items-center justify-between h-16 px-4 lg:px-6">
                     <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden w-9 h-9 rounded-xl flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-navy-800">

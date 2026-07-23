@@ -19,6 +19,7 @@ class ExamSession extends Model
         'answered_questions',
         'correct_answers',
         'status',
+        'question_ids',
     ];
 
     protected function casts(): array
@@ -27,6 +28,7 @@ class ExamSession extends Model
             'started_at' => 'datetime',
             'finished_at' => 'datetime',
             'last_activity_at' => 'datetime',
+            'question_ids' => 'array',
         ];
     }
 
