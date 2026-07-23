@@ -109,7 +109,7 @@ crudRoutes('keuangan/pembayaran', Payment::class,
     ['payment_number' => 'No. Pembayaran', 'invoice_id' => 'Invoice', 'amount' => 'Jumlah', 'method' => 'Metode', 'status' => 'Status'], 'Pembayaran');
 
 // Alias: redirect legacy invoice route
-Route::redirect('/admin/keuangan/invoice', '/admin/keuangan/tagihan')->name('admin.keuangan.invoice.index');
+Route::redirect('/keuangan/invoice', '/keuangan/tagihan')->name('keuangan.invoice.index');
 
 // 📢 CRM
 crudRoutes('crm/leads', Lead::class,
