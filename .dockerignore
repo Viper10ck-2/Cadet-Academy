@@ -1,0 +1,34 @@
+# Development
+.env
+.env.*
+/node_modules
+/.git
+.git/
+
+# Dependencies
+/vendor
+
+# Build
+/public/build
+/public/hot
+
+# IDE
+/.fleet
+/.idea
+/.vscode
+
+# Tests
+/tests
+/phpunit.xml
+/.phpunit.result.cache
+
+# System prompts / leaks
+/system_prompts_leaks
+
+# Docker
+Dockerfile
+/docker
+
+# Others
+*.md
+*.sqlite
