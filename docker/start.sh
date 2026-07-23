@@ -1,11 +1,7 @@
 #!/bin/bash
-set -e
 
-# Start PHP-FPM
+# Start PHP-FPM in background
 php-fpm -D
 
-# Start Nginx
-nginx -c /app/nginx.conf
-
-# Keep container alive
-wait -n
+# Start Nginx in foreground (keeps container alive)
+exec nginx -c /app/nginx.conf -g "daemon off;"
