@@ -27,7 +27,6 @@
 
 # Docker
 Dockerfile
-/docker
 
 # Others
 *.md
